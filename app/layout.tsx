@@ -8,11 +8,12 @@ export const metadata: Metadata = {
   description: 'A data-grounded command center for attendee growth, campaign experiments, arrival planning, and AI-assisted decisions.',
   applicationName: 'GateReady',
   generator: 'Next.js',
+  icons: { icon: '/gateready-mark.png' },
 }
 
 export const viewport: Viewport = {
   colorScheme: 'light',
-  themeColor: '#f4f6f8',
+  themeColor: '#f7f3ee',
   userScalable: true,
   maximumScale: 5,
 }

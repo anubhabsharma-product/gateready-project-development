@@ -1,8 +1,11 @@
 "use client"
 
-import { Bot, ChartNoAxesCombined, Database, Gauge, LayoutDashboard, ListChecks, Sparkles, TicketCheck } from "lucide-react"
+import Image from "next/image"
+import { ChartNoAxesCombined, Database, Gauge, LayoutDashboard, ListChecks, Sparkles } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { cn } from "@/lib/utils"
 
-export type ViewKey = "overview" | "campaigns" | "bets" | "tasks" | "capacity" | "data" | "analyst"
+export type ViewKey = "overview" | "campaigns" | "bets" | "tasks" | "capacity" | "data"
 
 const navigation: Array<{ id: ViewKey; label: string; icon: typeof LayoutDashboard; group: string }> = [
   { id: "overview", label: "Overview", icon: LayoutDashboard, group: "WORKSPACE" },
@@ -11,7 +14,6 @@ const navigation: Array<{ id: ViewKey; label: string; icon: typeof LayoutDashboa
   { id: "tasks", label: "Action board", icon: ListChecks, group: "GROWTH SYSTEM" },
   { id: "capacity", label: "Capacity lab", icon: Gauge, group: "PLANNING" },
   { id: "data", label: "Source & data", icon: Database, group: "PLANNING" },
-  { id: "analyst", label: "AI analyst", icon: Bot, group: "INTELLIGENCE" },
 ]
 
 export function Sidebar({ active, onNavigate, demoActive }: { active: ViewKey; onNavigate: (key: ViewKey) => void; demoActive: boolean }) {
@@ -19,13 +21,8 @@ export function Sidebar({ active, onNavigate, demoActive }: { active: ViewKey; o
   return (
     <aside className="gr-sidebar">
       <div className="gr-brand">
-        <div className="gr-brand-mark"><TicketCheck size={21} aria-hidden="true" /></div>
-        <div className="gr-brand-wordmark">Gate<span>Ready</span><small>ATTENDEE GROWTH</small></div>
-      </div>
-      <div className="gr-org-card">
-        <div className="gr-org-monogram" aria-hidden="true">SF</div>
-        <div className="gr-org-copy"><strong>IIT Kharagpur</strong><span>Spring Fest · Mumbai plan</span></div>
-        <span className="gr-org-chevron" aria-hidden="true">⌄</span>
+        <Image src="/gateready-mark.png" alt="" width={48} height={48} className="gr-brand-mark" />
+        <div><div className="gr-brand-wordmark">Gate<span>Ready</span></div><div className="gr-brand-caption">ATTENDEE GROWTH</div></div>
       </div>
       <nav aria-label="Main navigation" className="gr-nav">
         {navigation.map((item) => {
@@ -35,11 +32,10 @@ export function Sidebar({ active, onNavigate, demoActive }: { active: ViewKey; o
           return (
             <div key={item.id}>
               {showGroup && <div className="gr-nav-label">{item.group}</div>}
-              <button type="button" className={`gr-nav-item${active === item.id ? " is-active" : ""}`} onClick={() => onNavigate(item.id)} aria-current={active === item.id ? "page" : undefined}>
-                <Icon size={17} strokeWidth={1.8} aria-hidden="true" />
+              <Button type="button" variant="ghost" className={cn("gr-nav-item", active === item.id && "is-active")} onClick={() => onNavigate(item.id)} aria-current={active === item.id ? "page" : undefined}>
+                <Icon data-icon="inline-start" aria-hidden="true" />
                 <span>{item.label}</span>
-                {item.id === "analyst" && <span className="gr-ai-nav-dot" aria-hidden="true" />}
-              </button>
+              </Button>
             </div>
           )
         })}
@@ -52,7 +48,6 @@ export function Sidebar({ active, onNavigate, demoActive }: { active: ViewKey; o
         <div className="gr-user-card">
           <div className="gr-user-avatar" aria-hidden="true">AS</div>
           <div className="gr-user-copy"><strong>Growth team</strong><span>Student organizer</span></div>
-          <span className="gr-user-menu" aria-hidden="true">···</span>
         </div>
       </div>
     </aside>
