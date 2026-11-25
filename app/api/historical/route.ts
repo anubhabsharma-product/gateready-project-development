@@ -8,7 +8,6 @@ export const dynamic = "force-dynamic"
 
 export async function GET(request: NextRequest) {
   const session = sessionFromRequest(request)
-  if (session.present && !session.workspaceId) return NextResponse.json({ error: "Demo session is invalid." }, { status: 401 })
   try {
     let sourceOverride = null
     if (session.workspaceId) {

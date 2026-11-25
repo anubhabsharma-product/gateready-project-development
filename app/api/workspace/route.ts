@@ -1,7 +1,7 @@
 import { randomUUID } from "node:crypto"
 import { gunzipSync } from "node:zlib"
 import { NextRequest, NextResponse } from "next/server"
-import { sessionFromRequest } from "@/lib/demo-session"
+import { clearDemoCookie, sessionFromRequest } from "@/lib/demo-session"
 import { validateSameOrigin } from "@/lib/request-security"
 import { appendActivity, readWorkspace, updateWorkspace, DatabaseError } from "@/lib/supabase-admin"
 import { createDefaultWorkspace } from "@/lib/demo-state"
@@ -18,10 +18,11 @@ function publicAiStatus() {
 
 export async function GET(request: NextRequest) {
   const session = sessionFromRequest(request)
-  if (session.present && !session.workspaceId) return NextResponse.json({ error: "Demo session is invalid. Refresh the page to continue." }, { status: 401 })
   if (!session.workspaceId) {
     const body: WorkspaceResponse = { mode: "preview", revision: 0, state: createDefaultWorkspace(), ...publicAiStatus() }
-    return NextResponse.json(body)
+    const response = NextResponse.json(body, { headers: { "Cache-Control": "private, no-store" } })
+    if (session.present) clearDemoCookie(response)
+    return response
   }
   try {
     const workspace = await readWorkspace(session.workspaceId)

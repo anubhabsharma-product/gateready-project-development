@@ -41,6 +41,7 @@ export async function POST(request: NextRequest) {
     const messages: Record<string, string> = {
       RATE_LIMITED: "The analyst is at its short-term request limit. Wait a minute, then try again.",
       GEMINI_RATE_LIMITED: "Gemini is temporarily rate-limiting this project. Wait briefly, then try again.",
+      GEMINI_UNAVAILABLE: "Gemini is temporarily overloaded. Retry shortly; GateReady will not switch to a different model.",
       GEMINI_MODEL_UNAVAILABLE: "The configured Gemini model was not accepted. Check GEMINI_MODEL against Google's current model list.",
       GEMINI_REQUEST_FAILED: "Gemini could not complete this request. Please retry.",
       GEMINI_EMPTY_RESPONSE: "Gemini returned no answer. Please rephrase the question and retry.",

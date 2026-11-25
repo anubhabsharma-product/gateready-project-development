@@ -1,0 +1,191 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>GateReady — Attendee Growth Strategy</title>
+  <style>
+    @page { size: 13.333in 7.5in; margin: 0; }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; font-family: Arial, Helvetica, sans-serif; color: #13243b; background: #eef3f8; }
+    body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .slide { width: 1280px; height: 720px; position: relative; overflow: hidden; padding: 44px 58px 36px; background: #f6f8fb; page-break-after: always; break-after: page; }
+    .slide:last-child { page-break-after: auto; break-after: auto; }
+    .navy { background: #0b1729; color: #f4f8ff; }
+    .topline { display:flex; justify-content:space-between; align-items:center; margin-bottom: 20px; color: #8da5c2; font-size: 12px; font-weight: 700; letter-spacing: 1.8px; text-transform: uppercase; }
+    .brand { display:flex; align-items:center; gap:10px; color: #e8f0fb; letter-spacing: .4px; text-transform:none; font-size:13px; }
+    .mark { width: 25px; height: 25px; border-radius: 7px; background: #3d83f6; display:inline-flex; align-items:center; justify-content:center; color:#fff; font-size:14px; font-weight:800; }
+    h1 { margin:0; font-size: 39px; line-height: 1.07; letter-spacing:-1.2px; }
+    h2 { margin:0; font-size:24px; line-height:1.15; letter-spacing:-.5px; }
+    p { margin:0; }
+    .subhead { color:#aec0d5; margin-top:10px; font-size:15px; line-height:1.45; max-width:760px; }
+    .accent { color:#76aaff; }
+    .teal { color:#48c7bd; }
+    .muted { color:#8194ab; }
+    .slide-foot { position:absolute; bottom:18px; left:58px; right:58px; border-top:1px solid rgba(137,160,190,.22); padding-top:9px; display:flex; justify-content:space-between; color:#8498b1; font-size:10px; line-height:1.3; }
+    .hero { display:flex; justify-content:space-between; align-items:flex-end; gap:32px; margin-bottom:23px; }
+    .candidate { border-left:3px solid #4a8cf7; padding:10px 0 10px 15px; min-width:225px; color:#dbe7f6; font-size:13px; line-height:1.5; }
+    .candidate strong { display:block; color:#fff; font-size:15px; }
+    .stats { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin: 16px 0 18px; }
+    .stat { background:#12233a; border:1px solid #263d5b; border-radius:12px; padding:13px 15px; min-height:82px; }
+    .stat .label { color:#91a6c0; text-transform:uppercase; letter-spacing:1px; font-size:10px; font-weight:700; }
+    .stat strong { display:block; margin-top:8px; font-size:26px; line-height:1; letter-spacing:-.6px; color:#fff; }
+    .stat small { color:#a7bad0; font-size:10px; display:block; margin-top:6px; }
+    .model-grid { display:grid; grid-template-columns:1.18fr .82fr; gap:15px; }
+    .panel-dark { border:1px solid #263d5b; border-radius:14px; background:#101f34; padding:17px 18px; }
+    .panel-light { border:1px solid #dce4ee; border-radius:14px; background:#fff; padding:16px 18px; }
+    .panel-title { color:#90a5be; text-transform:uppercase; font-size:10px; letter-spacing:1.4px; font-weight:700; margin-bottom:12px; }
+    .funnel { display:grid; grid-template-columns:repeat(5,1fr); align-items:stretch; gap:7px; }
+    .funnel-step { background:#162b46; border-radius:9px; padding:12px 10px; min-height:79px; position:relative; }
+    .funnel-step:not(:last-child):after { content:'›'; position:absolute; right:-8px; top:26px; color:#5e84b4; font-size:20px; z-index:2; }
+    .funnel-step span { color:#9db2ca; display:block; font-size:10px; line-height:1.25; min-height:25px; }
+    .funnel-step strong { display:block; margin-top:6px; font-size:21px; color:white; }
+    .reach-note { color:#89a0bc; font-size:10px; line-height:1.35; margin-top:10px; }
+    .formula-row { display:flex; align-items:center; justify-content:space-between; padding:8px 0; border-bottom:1px solid #253a54; font-size:12px; color:#b8c7d8; }
+    .formula-row:last-of-type { border-bottom:0; }
+    .formula-row strong { color:#fff; font-size:14px; white-space:nowrap; }
+    .formula-total { display:flex; justify-content:space-between; align-items:center; background:#142b46; border-radius:9px; padding:10px 12px; margin-top:10px; }
+    .formula-total span { color:#a9bdd2; font-size:11px; }
+    .formula-total strong { color:#72a7ff; font-size:22px; }
+    .capacity-note { display:flex; gap:10px; align-items:flex-start; margin-top:13px; padding:10px 12px; background:#142b46; border-radius:9px; color:#bbcadb; font-size:10px; line-height:1.4; }
+    .pill { display:inline-flex; border-radius:999px; padding:5px 9px; color:#a9ddda; background:rgba(72,199,189,.12); font-size:10px; font-weight:700; white-space:nowrap; }
+    .light-head { margin-bottom:18px; display:flex; align-items:flex-end; justify-content:space-between; }
+    .light-head .topline { margin-bottom:10px; color:#62758d; gap:18px; }
+    .light-head .brand { color:#253a54; flex:1; }
+    .light-head .topline > span:last-child { margin-left:auto; white-space:nowrap; }
+    .light-head > div:first-child { flex:1; padding-right:20px; }
+    .light-head .mark { color:white; }
+    .light-head h1 { color:#13243b; font-size:34px; }
+    .light-head p { max-width:500px; color:#667991; margin-top:7px; font-size:12px; line-height:1.4; }
+    .score-note { background:#e9f1ff; color:#315c9b; border-radius:9px; padding:10px 12px; font-size:10px; line-height:1.45; max-width:310px; }
+    .bet-table { width:100%; border-collapse:separate; border-spacing:0 6px; }
+    .bet-table th { color:#6d7f96; font-size:9px; text-align:left; letter-spacing:1px; text-transform:uppercase; padding:0 10px 4px; }
+    .bet-table td { background:#fff; border-top:1px solid #e0e7ef; border-bottom:1px solid #e0e7ef; padding:9px 10px; vertical-align:middle; font-size:10px; line-height:1.28; }
+    .bet-table td:first-child { border-left:1px solid #e0e7ef; border-radius:9px 0 0 9px; width:240px; }
+    .bet-table td:last-child { border-right:1px solid #e0e7ef; border-radius:0 9px 9px 0; }
+    .rank { display:inline-flex; width:24px; height:24px; align-items:center; justify-content:center; background:#e9f1ff; color:#2364bd; border-radius:7px; font-weight:800; margin-right:7px; vertical-align:middle; }
+    .bet-name { font-weight:700; color:#193252; font-size:12px; }
+    .bet-sub { display:block; padding-left:32px; color:#788ba1; font-size:9px; margin-top:3px; }
+    .decision { color:#455b75; }
+    .decision strong { color:#17395f; }
+    .number { font-size:13px; color:#18365c; font-weight:800; white-space:nowrap; }
+    .small { color:#71839a; font-size:9px; display:block; margin-top:3px; }
+    .score { color:#2868c3; font-weight:800; font-size:13px; }
+    .resource { color:#526a84; font-size:9px; }
+    .portfolio { display:grid; grid-template-columns:1.35fr repeat(3,1fr); gap:8px; margin-top:8px; }
+    .portfolio div { background:#eaf0f7; border-radius:8px; padding:9px 11px; color:#53687f; font-size:10px; line-height:1.3; }
+    .portfolio strong { display:block; color:#18365c; font-size:15px; margin-bottom:2px; }
+    .small-foot { margin-top:8px; color:#73849a; font-size:9px; }
+    .decision-layout { display:grid; grid-template-columns:1.22fr .78fr; gap:15px; margin-top:10px; }
+    .rule-list { display:flex; flex-direction:column; gap:6px; }
+    .rule { display:grid; grid-template-columns:1fr 1.05fr; gap:10px; padding:8px 10px; background:#f5f8fc; border:1px solid #e6ebf2; border-radius:8px; }
+    .rule strong { color:#193654; display:block; font-size:11px; }
+    .rule span { color:#6a7c91; display:block; font-size:9px; line-height:1.3; margin-top:3px; }
+    .rule .gate { color:#385d88; font-size:9px; line-height:1.35; }
+    .workflow { display:flex; flex-direction:column; gap:7px; }
+    .flow-step { display:flex; gap:9px; align-items:flex-start; border-bottom:1px solid #e7edf4; padding-bottom:7px; }
+    .flow-step:last-child { border-bottom:0; padding-bottom:0; }
+    .flow-num { width:21px; height:21px; border-radius:50%; display:flex; align-items:center; justify-content:center; background:#e8f1ff; color:#2868c3; font-weight:800; font-size:10px; flex:none; }
+    .flow-step strong { display:block; font-size:10px; color:#193654; margin-bottom:2px; }
+    .flow-step span { display:block; color:#697c92; font-size:9px; line-height:1.35; }
+    .riskbar { display:flex; gap:9px; align-items:center; margin-top:10px; padding:9px 12px; border-radius:9px; color:#735b25; background:#fff7e7; font-size:9px; line-height:1.35; }
+    .sourcebar { margin-top:8px; color:#7c8ca0; font-size:8px; line-height:1.3; }
+    .strong { color:#18365c; font-weight:700; }
+    @media screen { body { padding:20px 0; } .slide { margin:0 auto 20px; box-shadow:0 15px 50px rgba(13,32,56,.16); } }
+    @media print { html,body { background:white; } .slide { margin:0; box-shadow:none; } }
+  </style>
+</head>
+<body>
+  <section class="slide navy">
+    <div class="topline"><span class="brand"><span class="mark">G</span> GateReady <span style="color:#607a99">/</span> Growth strategy</span><span>Part A · Challenge A · Attendee growth</span></div>
+    <div class="hero">
+      <div><h1>Turn trusted networks<br>into <span class="accent">verified arrivals.</span></h1><p class="subhead">A six-week acquisition and arrival plan for Mood Indigo, IIT Bombay · Powai, Mumbai</p></div>
+      <div class="candidate"><strong>Anubhab Sharma</strong>IIT Kharagpur<br>Spring Fest core-team context informs execution—not a claimed result.</div>
+    </div>
+    <div class="stats">
+      <div class="stat"><span class="label">Verified baseline</span><strong>2,050</strong><small>unique external arrivals · source snapshot</small></div>
+      <div class="stat"><span class="label">Latest confirmed</span><strong>2,500</strong><small>82% confirmed → verified arrival</small></div>
+      <div class="stat"><span class="label">Source spend</span><strong>₹2.74L</strong><small>₹3.00L source budget · ₹26k unspent</small></div>
+      <div class="stat"><span class="label">Pilot envelope</span><strong>₹3.00L</strong><small>five proposed bets · six weeks</small></div>
+    </div>
+    <div class="model-grid">
+      <div class="panel-dark">
+        <div class="panel-title">Observed funnel · CampusFest 2025 source pack · 20 Apr 2025</div>
+        <div class="funnel">
+          <div class="funnel-step"><span>Reported reach<br><i>platform-days, not unique</i></span><strong>666k</strong></div>
+          <div class="funnel-step"><span>Identified<br>external people</span><strong>3,625</strong></div>
+          <div class="funnel-step"><span>Registered<br>unique people</span><strong>2,800</strong></div>
+          <div class="funnel-step"><span>Latest confirmed<br>unique people</span><strong>2,500</strong></div>
+          <div class="funnel-step"><span>Admitted + verified<br>unique external</span><strong>2,050</strong></div>
+        </div>
+        <p class="reach-note">Not Mood Indigo history: the supplied synthetic/anonymized source is CampusFest 2025. Stable IDs, latest eligible status, verified external gate events, and one-person deduplication define the funnel.</p>
+      </div>
+      <div class="panel-dark">
+        <div class="panel-title">Scenario bridge · planning assumptions, not observed lift</div>
+        <div class="formula-row"><span>Base: 2,050 + 700 gross − 100 overlap</span><strong>2,650</strong></div>
+        <div class="formula-row"><span>Stretch: 2,050 + 1,300 gross − 150 overlap</span><strong>3,200</strong></div>
+        <div class="formula-total"><span>Six-week target range<br>base / stretch unique arrivals</span><strong>2,650 / 3,200</strong></div>
+        <div class="capacity-note"><span class="pill">GUARDRAIL</span><span>3,500 unique admissions and 1,500 concurrent occupancy are separate <b>hypothetical</b> limits—not venue approvals. Use only approved capacity; no-show expectations never authorize admissions.</span></div>
+      </div>
+    </div>
+    <div class="slide-foot"><span>Evidence: supplied source workbook + official institute/festival sources; see README research ledger.</span><span>1 / 3</span></div>
+  </section>
+
+  <section class="slide">
+    <div class="light-head">
+      <div><div class="topline"><span class="brand"><span class="mark">G</span> GateReady <span style="color:#9aacbf">/</span> Prioritized experiments</span><span>Slide 2 · resource allocation</span></div><h1>Fund learning before reach.</h1><p>Ranked bets combine the source signal with a measurable test. Cost and uplift are proposals; none is a measured causal effect.</p></div>
+      <div class="score-note"><b>Score / 100</b> = impact 40% + evidence/fit 30% + execution ease 20% + speed 10%. Four qualitative ratings on a 1–5 scale, normalized. Evidence is not statistical confidence.</div>
+    </div>
+    <table class="bet-table">
+      <thead><tr><th>Priority / bet · owner · timing</th><th>Test, scale gate → stop / change gate</th><th>Budget</th><th>Gross base / stretch</th><th>Score</th></tr></thead>
+      <tbody>
+        <tr><td><span class="rank">01</span><span class="bet-name">College-club contingents</span><span class="bet-sub">Partnerships + 10 student reps · W1–6</span></td><td class="decision">10 clubs, one tracked group link; reconcile rosters to verified arrivals. <strong>Scale:</strong> ≥80% arrival and ≤₹120/verified at 50 confirmations. <strong>Pause:</strong> &lt;70% or &gt;₹250.</td><td class="number">₹70k</td><td class="number">+150 / +275</td><td class="score">94</td></tr>
+        <tr><td><span class="rank">02</span><span class="bet-name">Buddy referrals</span><span class="bet-sub">Lifecycle lead + referral captain · W2–5</span></td><td class="decision">Randomize eligible registrants to shareable buddy pass vs holdout; dedupe people. <strong>Scale:</strong> ≥5pp arrival lift and ≤₹100 per incremental arrival. <strong>Stop:</strong> non-positive after 100 invites.</td><td class="number">₹50k</td><td class="number">+130 / +250</td><td class="score">92</td></tr>
+        <tr><td><span class="rank">03</span><span class="bet-name">Arrival-confidence CRM</span><span class="bet-sub">CRM lead + admissions desk · W2–6</span></td><td class="decision">Randomize schedule, transport, gate map, opt-in reminders vs current comms. <strong>Scale:</strong> ≥5pp verified-arrival lift. <strong>Pause:</strong> non-positive after 400 delivered or complaint/opt-out guardrail breach.</td><td class="number">₹35k</td><td class="number">+180 / +300</td><td class="score">88</td></tr>
+        <tr><td><span class="rank">04</span><span class="bet-name">Campus reps</span><span class="bet-sub">Campus lead + 20 pilot reps · W1–6</span></td><td class="decision">Unique rep codes; weekly confirmation roster and verified-arrival cohort readout. <strong>Scale:</strong> ≥75% arrival and ≤₹150/verified. <strong>Consolidate:</strong> &lt;60% or &gt;₹220.</td><td class="number">₹85k</td><td class="number">+90 / +190</td><td class="score">66</td></tr>
+        <tr><td><span class="rank">05</span><span class="bet-name">High-intent search + communities</span><span class="bet-sub">Content lead + community manager · W1–4</span></td><td class="decision">Mobile event guide + tagged posts; compare source-to-registration and arrivals. <strong>Scale:</strong> ≥60% identified-to-registration and ≤₹100/verified at 75 registrations. <strong>Stop paid:</strong> &lt;35% or &gt;₹180.</td><td class="number">₹60k</td><td class="number">+150 / +285</td><td class="score">66</td></tr>
+      </tbody>
+    </table>
+    <div class="portfolio">
+      <div><strong>₹300k</strong>total proposed pilot budget; equals source plan envelope.</div>
+      <div><strong>+700</strong>base gross arrivals</div>
+      <div><strong>+1,300</strong>stretch gross arrivals</div>
+      <div><strong>−100 / −150</strong>portfolio overlap haircut → net +600 / +1,150</div>
+    </div>
+    <p class="small-foot">Double down first on club contingents + referrals; protect a controlled CRM test. Deprioritize broad paid social until incremental verified-arrival cost improves. Historical source shows college partnerships at 91.7% arrival / ₹81 per verified arrival, referrals at 85.9% / ₹69, versus paid social at 58.6% / ₹274; observational only.</p>
+    <div class="slide-foot"><span>Gross per-bet estimates are planning inputs. Shared-person overlap is deducted once at portfolio level.</span><span>2 / 3</span></div>
+  </section>
+
+  <section class="slide">
+    <div class="light-head">
+      <div><div class="topline"><span class="brand"><span class="mark">G</span> GateReady <span style="color:#9aacbf">/</span> Decision rules</span><span>Slide 3 · insight to action</span></div><h1>Make arrival the outcome.</h1><p>Keep early signals separate from mature outcomes; act only when verified-arrival evidence and capacity controls support it.</p></div>
+      <div class="score-note"><b>Leading signals:</b> eligible roster, delivered reminders, identified→registered, confirmed count. <b>Mature outcomes:</b> unique admitted + verified external arrivals, incremental arrivals vs holdout, cost per incremental arrival.</div>
+    </div>
+    <div class="decision-layout">
+      <div class="panel-light">
+        <div class="panel-title">Decision gates · measure by cohort, not clicks</div>
+        <div class="rule-list">
+          <div class="rule"><div><strong>College contingents</strong><span>50+ confirmations before first scale decision.</span></div><div class="gate"><b>Scale</b> ≥80% arrival and ≤₹120/verified · <b>pause</b> &lt;70% or &gt;₹250.</div></div>
+          <div class="rule"><div><strong>Buddy referral holdout</strong><span>Unique eligible invites; compare verified arrival by assignment.</span></div><div class="gate"><b>Scale</b> ≥+5pp and ≤₹100/incremental arrival · <b>stop</b> non-positive after 100 invites.</div></div>
+          <div class="rule"><div><strong>Arrival CRM test</strong><span>Same observation window; suppress opt-outs.</span></div><div class="gate"><b>Scale</b> ≥+5pp verified arrival · pause if non-positive after 400 delivered or guardrail breach.</div></div>
+          <div class="rule"><div><strong>Campus reps</strong><span>20-rep pilot; weekly cohort reconciliation.</span></div><div class="gate"><b>Scale</b> ≥75% arrival and ≤₹150/verified · consolidate below 60% or above ₹220.</div></div>
+          <div class="rule"><div><strong>Search + communities</strong><span>75+ registrations before comparison.</span></div><div class="gate"><b>Scale</b> ≥60% identified→registered and ≤₹100/verified · stop paid below 35% or above ₹180.</div></div>
+        </div>
+      </div>
+      <div class="panel-light">
+        <div class="panel-title">Complete insight → confirmed action workflow</div>
+        <div class="workflow">
+          <div class="flow-step"><div class="flow-num">1</div><div><strong>Inspect source performance</strong><span>Filter the historical snapshot; see verified visits, arrival rate, and cost with definitions.</span></div></div>
+          <div class="flow-step"><div class="flow-num">2</div><div><strong>Ask Gemini: which channel needs attention?</strong><span>Model reads current saved state and selected date; validated tools calculate comparisons.</span></div></div>
+          <div class="flow-step"><div class="flow-num">3</div><div><strong>Probe the evidence</strong><span>Follow up on cohort denominators; the analyst labels descriptive evidence vs assumptions.</span></div></div>
+          <div class="flow-step"><div class="flow-num">4</div><div><strong>Draft, review, confirm</strong><span>Analyst proposes a trackable experiment task; a human reviews and explicitly saves it.</span></div></div>
+          <div class="flow-step"><div class="flow-num">5</div><div><strong>Persist, measure, update</strong><span>Task survives reload; edit a scenario and re-ask. Revision checks prevent stale overwrite.</span></div></div>
+        </div>
+      </div>
+    </div>
+    <div class="riskbar"><b>Capacity & evidence guardrail</b><span>Unique admission limit ≠ concurrent occupancy. Source pack has no approved venue cap, weather, travel mode, or causal lift. Keep 3,500 unique / 1,500 concurrent as hypothetical until approved; never sell above authorization based on expected no-shows.</span></div>
+    <p class="sourcebar">Sources: supplied synthetic/anonymized CampusFest 2025 workbook; Mood Indigo My MI portal (college contingent-leader role); IIT Bombay Contact us (Powai, Mumbai); IIT Delhi Rendezvous'25 and IIT Madras Saarang 2026 official festival pages. External organizer scale claims are not treated as audited unique footfall. Research accessed 26 Nov 2026; details and URLs in README.</p>
+    <div class="slide-foot"><span>GateReady is a reviewer demo, not live scanning, queue monitoring, or crowd-safety certification.</span><span>3 / 3</span></div>
+  </section>
+</body>
+</html>
