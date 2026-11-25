@@ -6,7 +6,10 @@ const MAX_AGE_SECONDS = 60 * 60 * 24 * 14
 let developmentSecret: string | undefined
 
 function signingSecret() {
-  if (process.env.DEMO_SESSION_SECRET) return process.env.DEMO_SESSION_SECRET
+  const configuredSecret = process.env.DEMO_SESSION_SECRET?.trim()
+  if (configuredSecret) return configuredSecret
+  const databaseSecret = process.env.SUPABASE_SERVICE_ROLE_KEY
+  if (databaseSecret) return createHmac("sha256", databaseSecret).update("gateready:demo-session:v1").digest("hex")
   if (process.env.NODE_ENV === "production") return null
   developmentSecret ??= randomBytes(32).toString("hex")
   return developmentSecret
