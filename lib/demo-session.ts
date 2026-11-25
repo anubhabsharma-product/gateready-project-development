@@ -2,6 +2,10 @@ import { createHmac, randomBytes, timingSafeEqual } from "node:crypto"
 import type { NextRequest, NextResponse } from "next/server"
 
 const COOKIE_NAME = "gateready_demo"
+const PARTITIONED_COOKIE_NAME = "gateready_demo_partitioned"
+const cookieDefaults = { httpOnly: true, path: "/" } as const
+const partitionedOptions = { ...cookieDefaults, secure: true, sameSite: "none", partitioned: true } as const
+const legacyOptions = { ...cookieDefaults, secure: process.env.NODE_ENV === "production", sameSite: "lax" } as const
 const MAX_AGE_SECONDS = 60 * 60 * 24 * 14
 let developmentSecret: string | undefined
 
@@ -43,21 +47,25 @@ export function verifyDemoToken(token: string | undefined) {
 }
 
 export function sessionFromRequest(request: NextRequest) {
-  const rawToken = request.cookies.get(COOKIE_NAME)?.value
-  if (!rawToken) return { present: false as const, workspaceId: null }
-  return { present: true as const, workspaceId: verifyDemoToken(rawToken) }
+  const partitioned = request.cookies.get(PARTITIONED_COOKIE_NAME)?.value
+  const legacy = request.cookies.get(COOKIE_NAME)?.value
+  if (!partitioned && !legacy) return { present: false as const, workspaceId: null }
+  return { present: true as const, workspaceId: verifyDemoToken(partitioned) ?? verifyDemoToken(legacy) }
 }
 
-export function setDemoCookie(response: NextResponse, workspaceId: string) {
-  response.cookies.set(COOKIE_NAME, issueDemoToken(workspaceId), {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",
-    path: "/",
-    maxAge: MAX_AGE_SECONDS,
-  })
+export function setDemoCookie(request: NextRequest, response: NextResponse, workspaceId: string) {
+  const protocol = request.headers.get("x-forwarded-proto")?.split(",")[0]?.trim() || request.nextUrl.protocol.slice(0, -1)
+  const supportsSecureCookie = protocol === "https" || request.nextUrl.hostname === "localhost"
+  const token = issueDemoToken(workspaceId)
+  if (supportsSecureCookie) {
+    // The preview is embedded cross-site; partitioning keeps its session scoped to the embedding site.
+    response.cookies.set(PARTITIONED_COOKIE_NAME, token, { ...partitionedOptions, maxAge: MAX_AGE_SECONDS })
+  } else {
+    response.cookies.set(COOKIE_NAME, token, { ...legacyOptions, maxAge: MAX_AGE_SECONDS })
+  }
 }
 
 export function clearDemoCookie(response: NextResponse) {
-  response.cookies.set(COOKIE_NAME, "", { httpOnly: true, secure: process.env.NODE_ENV === "production", sameSite: "lax", path: "/", maxAge: 0 })
+  response.cookies.set(PARTITIONED_COOKIE_NAME, "", { ...partitionedOptions, maxAge: 0 })
+  response.cookies.set(COOKIE_NAME, "", { ...legacyOptions, maxAge: 0 })
 }

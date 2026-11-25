@@ -35,7 +35,7 @@ export async function GET(request: NextRequest) {
       hasSourceOverride: Boolean(payload.sourceOverride),
       ...publicAiStatus(),
     }
-    return NextResponse.json(body)
+    return NextResponse.json(body, { headers: { "Cache-Control": "private, no-store" } })
   } catch (error) {
     const status = error instanceof DatabaseError ? error.status : 503
     return NextResponse.json({ error: status === 503 ? "The private workspace store is temporarily unavailable." : "Unable to read this workspace." }, { status })

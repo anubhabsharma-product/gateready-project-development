@@ -60,7 +60,12 @@ export function AppShell() {
       const response = await fetch("/api/demo", { method: "POST", headers: { "Content-Type": "application/json" } })
       const result = await response.json()
       if (!response.ok) throw new Error(result.error || "The private demo could not be opened.")
-      await mutateWorkspace(result, { revalidate: false })
+      const verified = await mutateWorkspace()
+      if (verified?.mode !== "demo") {
+        throw new Error(window.self !== window.top
+          ? "This browser blocked the demo session in the embedded preview. Open GateReady in a new tab, then try the demo again."
+          : "The browser did not keep the demo session. Allow cookies for this site and try again.")
+      }
       setSaveNotice("Private workspace opened. Changes will be saved to your isolated demo session.")
       setTimeout(() => setSaveNotice(""), 5000)
     } catch (error) {
