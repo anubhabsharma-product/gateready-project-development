@@ -115,7 +115,7 @@ export function AnalystPanel({ history, state, date, campaignId, demoActive, aiC
 
   return (
     <div className="gr-page-stack gr-analyst-page">
-      <section className="gr-welcome-row"><div><div className="gr-eyebrow">GEMINI · FUNCTION-TOOL ANALYSIS · SNAPSHOT {history.snapshotDate}</div><h1>Ask what the data can support.</h1><p className="gr-page-intro">A focused analyst for source-verified campaign metrics, transparent scenarios, and draft tasks that wait for your confirmation.</p></div><span className={`gr-ai-status-pill ${aiConfigured ? "is-ready" : "is-missing"}`}><span /> {aiConfigured ? `${aiModel} ready` : "Gemini key needed"}</span></section>
+      <section className="gr-welcome-row"><div><div className="gr-eyebrow">GEMINI · FUNCTION-TOOL ANALYSIS · SNAPSHOT {history.snapshotDate}</div><p className="gr-page-intro">Compare campaign results, model scenarios, or draft an action for review.</p></div><span className={`gr-ai-status-pill ${aiConfigured ? "is-ready" : "is-missing"}`}><span /> {!demoActive ? "Private demo required" : aiConfigured ? `${aiModel} ready` : "Gemini key needed"}</span></section>
 
       <section className="gr-analyst-layout">
         <div className="gr-card gr-chat-panel">
@@ -128,7 +128,7 @@ export function AnalystPanel({ history, state, date, campaignId, demoActive, aiC
           </div>
           {error && <div className="gr-chat-error" role="alert">{error}</div>}{notice && <div className="gr-chat-notice" role="status">{notice}</div>}
           <form className="gr-chat-composer" onSubmit={(event) => { event.preventDefault(); void ask() }}>
-            <label className="gr-sr-only" htmlFor="gr-analyst-question">Ask the GateReady analyst</label><textarea id="gr-analyst-question" value={question} onChange={(event) => setQuestion(event.target.value)} onKeyDown={handleKeyDown} placeholder={aiConfigured ? "Ask about verified arrivals, channel efficiency, or a scenario…" : "Add GEMINI_API_KEY to activate Gemini analysis…"} maxLength={2500} rows={2} disabled={!demoActive || !aiConfigured || busy} />
+            <label className="gr-sr-only" htmlFor="gr-analyst-question">Ask the GateReady analyst</label><textarea id="gr-analyst-question" value={question} onChange={(event) => setQuestion(event.target.value)} onKeyDown={handleKeyDown} placeholder={!demoActive ? "Draft a question, then open a private demo to send it…" : aiConfigured ? "Ask about verified arrivals, channel efficiency, or a scenario…" : "Gemini is not configured for this deployment…"} maxLength={2500} rows={2} disabled={busy} />
             <div className="gr-composer-footer"><span><CircleHelp size={13} aria-hidden="true" /> Private saved thread · avoid entering sensitive personal data</span><button type="submit" className="gr-send-button" disabled={!demoActive || !aiConfigured || busy || !question.trim()} aria-label="Send question">{busy ? <LoaderCircle size={17} className="gr-spin" aria-hidden="true" /> : <Send size={17} aria-hidden="true" />}</button></div>
           </form>
         </div>

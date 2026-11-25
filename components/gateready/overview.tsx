@@ -18,7 +18,7 @@ function KpiCard({ label, value, caption, icon: Icon, accent, progress }: { labe
   )
 }
 
-export function OverviewPanel({ history, state, onNavigate }: { history: HistoricalAnalytics; state: WorkspaceState; onNavigate: (view: ViewKey) => void }) {
+export function OverviewPanel({ history, state, onNavigate, onAskAnalyst }: { history: HistoricalAnalytics; state: WorkspaceState; onNavigate: (view: ViewKey) => void; onAskAnalyst: () => void }) {
   const metrics = history.totals
   const overall = history.overall
   const target = history.target
@@ -111,7 +111,7 @@ export function OverviewPanel({ history, state, onNavigate }: { history: Histori
           {strongestEfficiency && <Insight tone="teal" icon={<ArrowUpRight size={15} aria-hidden="true" />} title={`${strongestEfficiency.name} was the lowest-cost arrival source`} detail={`${formatINRCompact(strongestEfficiency.costPerAttendee)} per campaign-attributed verified visitor in the workbook.`} />}
           {weakestArrival && <Insight tone="coral" icon={<ArrowDownRight size={15} aria-hidden="true" />} title={`${weakestArrival.name} is the first funnel to diagnose`} detail={`${formatPercent(weakestArrival.arrivalRate)} of latest confirmed registrations reached a verified admission.`} />}
           <Insight tone="gold" icon={<CircleHelp size={15} aria-hidden="true" />} title={`${formatNumber(history.dataQuality.unattributedAttendees)} arrivals lack campaign attribution`} detail="Keep them in the unique visitor total; don't backfill a campaign from registration history." />
-          <button type="button" className="gr-insight-footer" onClick={() => onNavigate("analyst")}>Ask the AI analyst about this snapshot <ArrowUpRightFromSquare size={13} aria-hidden="true" /></button>
+          <button type="button" className="gr-insight-footer" onClick={onAskAnalyst}>Ask the AI analyst about this snapshot <ArrowUpRightFromSquare size={13} aria-hidden="true" /></button>
         </article>
       </section>
     </div>
