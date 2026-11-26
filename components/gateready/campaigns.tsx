@@ -71,6 +71,7 @@ export function CampaignsPanel({ history, state, filter, demoActive, onSave, onS
         <div className="gr-table-wrap"><table className="gr-data-table">
           <thead><tr><th scope="col">Campaign</th><th scope="col">Reported reach</th><th scope="col">Registered</th><th scope="col">Confirmed</th><th scope="col">Verified</th><th scope="col">Arrival</th><th scope="col">Spend</th><th scope="col">Cost / visitor</th><th scope="col"><span className="gr-sr-only">Actions</span></th></tr></thead>
           <tbody>
+            {sorted.length === 0 && <tr><td colSpan={9}>{filter === "unattributed" ? "Unattributed visits are not assigned to a campaign." : "No campaigns match this selection."}</td></tr>}
             {sorted.map((metric, index) => {
               const planned = state.campaigns.find((campaign) => campaign.campaignId === metric.campaignId)
               const isEditing = editingId === metric.campaignId
@@ -96,7 +97,7 @@ export function CampaignsPanel({ history, state, filter, demoActive, onSave, onS
       </article>
 
       <section className="gr-campaign-lower-grid">
-        <article className="gr-card gr-small-panel"><div className="gr-section-kicker">SCENARIO MODEL</div><h2>Editable inputs</h2><p>Owner, stage, reach, registration, confirmation rate, and scenario spend are stored separately from the immutable source workbook.</p><button type="button" className="gr-inline-link" onClick={() => setEditingId(sorted[0]?.campaignId ?? null)} disabled={!demoActive}>Edit leading channel <ArrowUpRight size={14} aria-hidden="true" /></button></article>
+        <article className="gr-card gr-small-panel"><div className="gr-section-kicker">SCENARIO MODEL</div><h2>Editable inputs</h2><p>Owner, stage, reach, registration, confirmation rate, and scenario spend are stored separately from the immutable source workbook.</p><button type="button" className="gr-inline-link" onClick={() => setEditingId(sorted[0]?.campaignId ?? null)} disabled={!demoActive || sorted.length === 0}>Edit leading channel <ArrowUpRight size={14} aria-hidden="true" /></button></article>
         <article className="gr-card gr-small-panel gr-definition-card"><div className="gr-section-kicker">ATTRIBUTION RULE</div><h2>No last-click guesswork</h2><p>Attendance is attributed only to the first eligible verified check-in&apos;s own campaign ID. Blank check-in campaign IDs remain unattributed.</p></article>
       </section>
     </div>

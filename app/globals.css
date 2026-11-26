@@ -213,6 +213,7 @@
 .gr-topbar-divider { width: 1px; height: 19px; background: var(--border); }
 .gr-topbar-status { display: flex; align-items: center; gap: 6px; color: var(--muted-foreground); font-size: 11px; white-space: nowrap; }
 .gr-topbar-right { flex-wrap: wrap; gap: 8px; }
+.gr-date-filter { display: flex; min-width: 0; align-items: center; gap: 6px; }
 .gr-top-control { display: flex; height: 36px; align-items: center; gap: 6px; padding: 0 9px; border: 1px solid var(--border); border-radius: 8px; background: var(--card); color: var(--muted-foreground); }
 .gr-top-control:focus-within { outline: 2px solid var(--ring); outline-offset: 2px; }
 .gr-top-control input, .gr-top-control select { min-width: 0; border: 0; outline: 0; background: transparent; color: var(--foreground); font-size: 11px; }
@@ -696,6 +697,8 @@
   .gr-topbar-left { grid-area: 1 / 1; }
   .gr-topbar-divider { display: none; }
   .gr-topbar-right { display: contents; }
+  .gr-date-filter, .gr-campaign-control { grid-column: 1 / -1; }
+  .gr-date-filter .gr-date-control { flex: 1; }
   .gr-security-badge { grid-area: 1 / 2; justify-self: end; }
   .gr-top-control { min-width: 0; height: 40px; padding: 0 7px; }
   .gr-top-control input, .gr-top-control select { width: 100%; font-size: 14px; }

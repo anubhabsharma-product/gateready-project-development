@@ -270,23 +270,23 @@ export function getHistoricalAnalytics(snapshotDate?: string, campaignFilter?: s
   const trendBuckets = new Map<string, { reach: number; registrations: Set<string>; attendees: Set<string> }>()
   const monthBucket = (dateValue: unknown) => {
     const month = day(dateValue).slice(0, 7)
-    if (!/^\\d{4}-\\d{2}$/.test(month)) return null
+    if (!/^\d{4}-\d{2}$/.test(month)) return null
     if (!trendBuckets.has(month)) trendBuckets.set(month, { reach: 0, registrations: new Set(), attendees: new Set() })
     return trendBuckets.get(month)!
   }
   for (const entry of dailyRows) {
-    if (campaignFilter && text(entry.campaign_id) !== campaignFilter) continue
+    if (selectedUnattributed || (campaignFilter && text(entry.campaign_id) !== campaignFilter)) continue
     const bucket = monthBucket(entry.activity_date)
     if (bucket) bucket.reach += numeric(entry.reported_reach)
   }
   for (const entry of registrations) {
-    if (campaignFilter && text(entry.campaign_id) !== campaignFilter) continue
+    if (selectedUnattributed || (campaignFilter && text(entry.campaign_id) !== campaignFilter)) continue
     const bucket = monthBucket(entry.registered_at)
     if (bucket) bucket.registrations.add(text(entry.person_id))
   }
   for (const entry of firstVerifiedAdmissionByPerson.values()) {
-    const admissionCampaign = text(entry.campaign_id) || "unattributed"
-    if (campaignFilter && admissionCampaign !== campaignFilter) continue
+    const admissionCampaign = text(entry.campaign_id)
+    if (selectedUnattributed ? campaignIds.has(admissionCampaign) : campaignFilter && admissionCampaign !== campaignFilter) continue
     const bucket = monthBucket(entry.occurred_at)
     if (bucket) bucket.attendees.add(text(entry.person_id))
   }
