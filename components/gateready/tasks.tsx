@@ -62,25 +62,25 @@ export function TasksPanel({ state, demoActive, onSave, onStartDemo }: { state: 
 
   return (
     <div className="gr-page-stack">
-      <section className="gr-welcome-row"><div><div className="gr-eyebrow">EXPERIMENT OPERATIONS · OWNERS · GATES</div><h1>Move the next action forward.</h1><p className="gr-page-intro">Keep every experiment tied to an owner, a checkpoint, and a measurable stop-or-scale decision.</p></div><button type="button" className="gr-button gr-button-primary" disabled={!demoActive} onClick={() => setShowForm((show) => !show)}><Plus size={15} aria-hidden="true" /> New action</button></section>
+      <section className="gr-welcome-row"><div><h1>Action board</h1><p className="gr-page-intro">Track owners, due dates, and progress for planned experiments.</p></div><button type="button" className="gr-button gr-button-primary" disabled={!demoActive} onClick={() => setShowForm((show) => !show)}><Plus size={15} aria-hidden="true" /> New action</button></section>
       {!demoActive && <div className="gr-notice gr-demo-banner"><div><strong>Action board is a read-only preview.</strong><p>Start a private demo to assign owners and persist status changes across reloads.</p></div><button type="button" className="gr-button gr-button-primary" onClick={onStartDemo}>Start interactive demo</button></div>}
       {error && <div className="gr-form-error" role="alert">{error}</div>}
 
       <section className="gr-task-summary-grid">
-        <article className="gr-card gr-task-summary"><span>Open actions</span><strong>{state.tasks.filter((task) => task.status !== "Done").length}</strong><small>Tasks in the working plan</small></article>
-        <article className="gr-card gr-task-summary"><span>In progress</span><strong>{state.tasks.filter((task) => task.status === "In progress").length}</strong><small>Owner has started the work</small></article>
-        <article className="gr-card gr-task-summary"><span>Completed</span><strong>{completed}</strong><small>Progress stays in this workspace</small></article>
+        <article className="gr-card gr-task-summary"><span>Open actions</span><strong>{state.tasks.filter((task) => task.status !== "Done").length}</strong></article>
+        <article className="gr-card gr-task-summary"><span>In progress</span><strong>{state.tasks.filter((task) => task.status === "In progress").length}</strong></article>
+        <article className="gr-card gr-task-summary"><span>Completed</span><strong>{completed}</strong></article>
         <article className="gr-card gr-task-progress"><div><span>Board progress</span><strong>{Math.round(progress * 100)}%</strong></div><div className="gr-progress-track"><span style={{ width: `${progress * 100}%` }} /></div><small>{completed} of {state.tasks.length} items complete</small></article>
       </section>
 
       {showForm && <form className="gr-card gr-task-form" onSubmit={createTask}>
-        <div className="gr-panel-heading"><div><div className="gr-section-kicker">NEW ACTION</div><h2>Define the next measurable step</h2></div><button type="button" className="gr-icon-button" onClick={() => setShowForm(false)} aria-label="Close task form">×</button></div>
+        <div className="gr-panel-heading"><div><h2>New action</h2></div><button type="button" className="gr-icon-button" onClick={() => setShowForm(false)} aria-label="Close task form">×</button></div>
         <div className="gr-task-form-grid"><label>Action title<input value={draft.title} maxLength={180} required onChange={(event) => setDraft({ ...draft, title: event.target.value })} placeholder="e.g. Launch the 10-club pilot" /></label><label>Owner<input list="gr-team-owners" value={draft.owner} maxLength={100} required onChange={(event) => setDraft({ ...draft, owner: event.target.value })} /><datalist id="gr-team-owners">{[...new Set(state.campaigns.map((campaign) => campaign.scenario.owner))].map((owner) => <option key={owner} value={owner} />)}<option value="Growth team" /></datalist></label><label className="gr-task-description">Measurable next step<textarea value={draft.description} maxLength={1000} required rows={3} onChange={(event) => setDraft({ ...draft, description: event.target.value })} placeholder="What will the owner deliver, and how will success be measured?" /></label><label>Due date<input type="date" value={draft.dueDate} required onChange={(event) => setDraft({ ...draft, dueDate: event.target.value })} /></label><label>Priority<select value={draft.priority} onChange={(event) => setDraft({ ...draft, priority: event.target.value as GrowthTask["priority"] })}><option>High</option><option>Medium</option><option>Low</option></select></label><label>Campaign link<select value={draft.campaignId} onChange={(event) => setDraft({ ...draft, campaignId: event.target.value })}><option value="">No campaign link</option>{state.campaigns.map((campaign) => <option key={campaign.campaignId} value={campaign.campaignId}>{campaign.name}</option>)}</select></label></div>
         <div className="gr-editor-actions"><button type="button" className="gr-button gr-button-ghost" onClick={() => setShowForm(false)}>Cancel</button><button type="submit" className="gr-button gr-button-primary" disabled={Boolean(busyId)}><Plus size={14} aria-hidden="true" /> Save action</button></div>
       </form>}
 
       <section className="gr-card gr-task-board">
-        <div className="gr-task-board-heading"><div><div className="gr-section-kicker">ACTION BOARD</div><h2>Work that moves the metric</h2></div><div className="gr-toggle-group gr-task-filters" role="group" aria-label="Filter action board">{(["All", "Todo", "In progress", "Done"] as const).map((status) => <button key={status} type="button" className={filter === status ? "is-selected" : ""} onClick={() => setFilter(status)}>{status}</button>)}</div></div>
+        <div className="gr-task-board-heading"><div><h2>Tasks</h2></div><div className="gr-toggle-group gr-task-filters" role="group" aria-label="Filter action board">{(["All", "Todo", "In progress", "Done"] as const).map((status) => <button key={status} type="button" aria-pressed={filter === status} onClick={() => setFilter(status)}>{status}</button>)}</div></div>
         <div className="gr-task-list">
           {tasks.map((task) => {
             const linkedCampaign = state.campaigns.find((campaign) => campaign.campaignId === task.campaignId)
@@ -91,9 +91,8 @@ export function TasksPanel({ state, demoActive, onSave, onStartDemo }: { state: 
               <div className="gr-task-actions"><button type="button" className="gr-icon-button" onClick={() => updateStatus(task)} disabled={!demoActive} aria-label={`Advance ${task.title} from ${task.status}`}>{task.status === "Done" ? <Circle size={15} aria-hidden="true" /> : <ArrowRight size={15} aria-hidden="true" />}</button><button type="button" className="gr-icon-button gr-delete-task" onClick={() => deleteTask(task)} disabled={!demoActive} aria-label={`Delete ${task.title}`}><Trash2 size={15} aria-hidden="true" /></button></div>
             </article>
           })}
-          {!tasks.length && <div className="gr-empty-state"><ListChecks size={27} aria-hidden="true" /><strong>Nothing in this view yet.</strong><span>Add an action from a growth bet or create a custom task.</span><button type="button" className="gr-inline-link" onClick={() => setShowForm(true)} disabled={!demoActive}>Create a task <ArrowRight size={14} aria-hidden="true" /></button></div>}
+          {!tasks.length && <div className="gr-empty-state"><ListChecks size={27} aria-hidden="true" /><strong>No tasks match this filter.</strong><span>Add an action from a growth bet or create a custom task.</span><button type="button" className="gr-inline-link" onClick={() => setShowForm(true)} disabled={!demoActive}>Create a task <ArrowRight size={14} aria-hidden="true" /></button></div>}
         </div>
-        <div className="gr-board-footer"><span><CircleAlert size={14} aria-hidden="true" /> Tasks marked “Plan” or “In progress” are not completed campaign results.</span><span>Workspace revision is saved on each change.</span></div>
       </section>
     </div>
   )
