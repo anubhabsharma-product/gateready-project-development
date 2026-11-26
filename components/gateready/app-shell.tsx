@@ -142,7 +142,7 @@ export function AppShell() {
   }
 
   return (
-    <div className="gr-app-shell">
+    <div className="gr-app-shell" data-view={activeView}>
       <Sidebar active={activeView} onNavigate={setActiveView} demoActive={Boolean(demoActive)} />
       <main className="gr-main-area">
         <header className="gr-topbar">

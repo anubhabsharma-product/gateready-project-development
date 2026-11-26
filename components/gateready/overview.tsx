@@ -1,6 +1,7 @@
 "use client"
 
 import { ArrowDownRight, ArrowUpRight, ArrowUpRightFromSquare, ArrowRight, BadgeCheck, Banknote, CircleHelp, ClipboardCheck, Compass, UsersRound } from "lucide-react"
+import { AcquisitionChart } from "@/components/gateready/acquisition-chart"
 import type { HistoricalAnalytics } from "@/lib/analytics"
 import type { WorkspaceState } from "@/lib/types"
 import { getOperatingForecast } from "@/lib/demo-state"
@@ -26,13 +27,13 @@ export function OverviewPanel({ history, campaignFilter, state, onNavigate, onAs
   const spendLeft = Math.max(0, state.budgetLimitInr - spend)
   const attendeeGoal = campaignFilter ? 0 : history.target?.attendees ?? 0
   const attendeeProgress = attendeeGoal ? (metrics.attendees ?? 0) / attendeeGoal : null
-  const peakReach = Math.max(1, ...history.trend.map((point) => point.reportedReach))
-  const peakRegs = Math.max(1, ...history.trend.map((point) => point.registrations))
+  const capacity = state.capacity.uniqueAdmissionLimit
+  const capacityFill = Math.min(100, Math.max(0, forecast.capped / Math.max(1, capacity) * 100))
   const strongestEfficiency = history.campaigns.filter((campaign) => campaign.costPerAttendee != null).sort((a, b) => (a.costPerAttendee ?? Infinity) - (b.costPerAttendee ?? Infinity))[0]
   const weakestArrival = history.campaigns.filter((campaign) => campaign.arrivalRate != null).sort((a, b) => (a.arrivalRate ?? 0) - (b.arrivalRate ?? 0))[0]
 
   return (
-    <div className="gr-page-stack">
+    <div className="gr-page-stack gr-overview">
       <section className="gr-welcome-row">
         <div>
           <div className="gr-eyebrow">ATTENDEE ACQUISITION · {history.snapshotDate} · {scope}</div>
@@ -55,7 +56,8 @@ export function OverviewPanel({ history, campaignFilter, state, onNavigate, onAs
         <KpiCard label="Net posted spend" value={formatINRCompact(spend)} caption={campaignFilter ? "Posted spend for this selection" : `${formatINRCompact(spendLeft)} below ${formatINRCompact(state.budgetLimitInr)} working budget cap`} icon={Banknote} accent="gr-kpi-gold" />
       </section>
 
-      <section className="gr-primary-grid">
+      <div className="gr-overview-grid">
+        <AcquisitionChart trend={history.trend} />
         <article className="gr-card gr-panel gr-funnel-panel">
           <div className="gr-panel-heading">
             <div><div className="gr-section-kicker">SOURCE PERFORMANCE</div><h2>Where the funnel thins</h2></div>
@@ -75,33 +77,17 @@ export function OverviewPanel({ history, campaignFilter, state, onNavigate, onAs
             <div><div className="gr-section-kicker">EVENT-WIDE PLANNING MODEL</div><h2>Base-case forecast</h2></div>
             <span className="gr-assumption-pill">ASSUMPTION</span>
           </div>
-          <div className="gr-forecast-number">{formatNumber(forecast.capped)}<span>people</span></div>
+          <div className="gr-forecast-gauge" role="img" aria-label={`${formatNumber(forecast.capped)} of ${formatNumber(capacity)} assumed unique admissions capacity`}>
+            <svg viewBox="0 0 200 110" aria-hidden="true">
+              <path className="gr-gauge-track" d="M 14,100 a 86,86 0 0,1 172,0" pathLength="100" />
+              {capacityFill > 0 && <path className="gr-gauge-value" d="M 14,100 a 86,86 0 0,1 172,0" pathLength="100" strokeDasharray={`${capacityFill} 100`} />}
+            </svg>
+            <div className="gr-forecast-number" aria-hidden="true">{formatNumber(forecast.capped)}<span>people</span></div>
+          </div>
+          <div className="gr-meter-labels"><span>0</span><span>{formatNumber(capacity)} assumed unique cap</span></div>
           <p className="gr-forecast-caption">Historical baseline {formatNumber(forecast.baseline)} + {formatNumber(forecast.gross)} gross bet arrivals − {formatNumber(forecast.overlap)} overlap.</p>
-          <div className="gr-forecast-meter" role="img" aria-label={`${formatNumber(forecast.capped)} of ${formatNumber(state.capacity.uniqueAdmissionLimit)} assumed unique admissions capacity`}><span style={{ width: `${Math.min(100, (forecast.capped / Math.max(1, state.capacity.uniqueAdmissionLimit)) * 100)}%` }} /></div>
-          <div className="gr-meter-labels"><span>0</span><span>{formatNumber(state.capacity.uniqueAdmissionLimit)} assumed unique cap</span></div>
           <div className="gr-forecast-compare"><div><span>Stretch case</span><strong>{formatNumber(state.assumptions.stretchTarget)}</strong></div><div><span>Budget plan</span><strong>{formatINRCompact(state.budgetLimitInr)}</strong></div></div>
           <button type="button" className="gr-button gr-button-soft gr-full-button" onClick={() => onNavigate("capacity")}>Adjust scenario inputs <ArrowUpRight size={15} aria-hidden="true" /></button>
-        </article>
-      </section>
-
-      <section className="gr-secondary-grid">
-        <article className="gr-card gr-panel gr-trend-panel">
-          <div className="gr-panel-heading">
-            <div><div className="gr-section-kicker">MOMENTUM</div><h2>Monthly acquisition signals</h2></div>
-            <span className="gr-legend"><i className="gr-legend-reach" /> Reach <i className="gr-legend-registrations" /> Registrations</span>
-          </div>
-          {history.trend.some((point) => point.reportedReach || point.registrations) ? <div className="gr-chart" role="img" aria-label="Monthly reported reach and unique registrations trend">
-            {history.trend.map((point) => (
-              <div className="gr-chart-month" key={point.month}>
-                <div className="gr-chart-bars" title={`${point.month}: ${formatNumber(point.reportedReach)} reported reach, ${formatNumber(point.registrations)} registrations`}>
-                  <span className="gr-chart-bar gr-chart-bar-reach" style={{ height: `${point.reportedReach / peakReach * 100}%` }} />
-                  <span className="gr-chart-bar gr-chart-bar-register" style={{ height: `${point.registrations / peakRegs * 100}%` }} />
-                </div>
-                <span className="gr-chart-label">{point.month}</span>
-              </div>
-            ))}
-          </div> : <p className="gr-page-intro">No reported reach or registrations for this selection.</p>}
-          <div className="gr-chart-note"><span><i className="gr-dot gr-dot-coral" /> Unique registration people</span><span>Daily reported reach can overlap</span></div>
         </article>
 
         <article className="gr-card gr-panel gr-insight-panel">
@@ -111,7 +97,7 @@ export function OverviewPanel({ history, campaignFilter, state, onNavigate, onAs
           {(!campaignFilter || campaignFilter === "unattributed") && <Insight tone="gold" icon={<CircleHelp size={15} aria-hidden="true" />} title={`${formatNumber(history.dataQuality.unattributedAttendees)} arrivals lack campaign attribution`} detail="Keep them in the unique visitor total; don't backfill a campaign from registration history." />}
           <button type="button" className="gr-insight-footer" onClick={onAskAnalyst}>Ask the AI analyst about this snapshot <ArrowUpRightFromSquare size={13} aria-hidden="true" /></button>
         </article>
-      </section>
+      </div>
     </div>
   )
 }
