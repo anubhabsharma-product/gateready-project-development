@@ -41,15 +41,6 @@ async function openPrivateWorkspace() {
   return verified
 }
 
-const pageTitles: Record<ViewKey, string> = {
-  overview: "Growth overview",
-  campaigns: "Campaign performance",
-  bets: "Prioritized growth bets",
-  tasks: "Experiment action board",
-  capacity: "Capacity & forecast",
-  data: "Source & data quality",
-}
-
 export function AppShell() {
   const [activeView, setActiveView] = useState<ViewKey>("overview")
   const [analystOpen, setAnalystOpen] = useState(false)
@@ -85,6 +76,12 @@ export function AppShell() {
   const selectedDate = date || history?.range.end || ""
   const displayedHistory = historyLoading || historyError ? undefined : history
 
+  function navigate(view: ViewKey) {
+    if (view === activeView) return
+    setActiveView(view)
+    window.scrollTo(0, 0)
+  }
+
   async function startDemo() {
     if (startingDemo) return
     setStartingDemo(true)
@@ -92,7 +89,7 @@ export function AppShell() {
     try {
       const verified = await openPrivateWorkspace()
       await mutateWorkspace(verified, { revalidate: false })
-      setSaveNotice("Private workspace opened. Changes will be saved to your isolated demo session.")
+      setSaveNotice("Private workspace opened.")
       setTimeout(() => setSaveNotice(""), 5000)
     } catch (error) {
       setSaveError(error instanceof Error ? error.message : "The private demo could not be opened.")
@@ -134,7 +131,7 @@ export function AppShell() {
   const demoActive = workspace?.mode === "demo"
 
   if (workspaceLoading && !workspace) {
-    return <div className="gr-loading-screen"><span className="gr-loading-mark"><LoaderCircle className="gr-spin" size={22} aria-hidden="true" /></span><strong>Opening GateReady</strong><span>Loading the source-verified workspace…</span></div>
+    return <div className="gr-loading-screen"><span className="gr-loading-mark"><LoaderCircle className="gr-spin" size={22} aria-hidden="true" /></span><strong>Opening workspace…</strong></div>
   }
 
   if (workspaceError || !workspace || !state) {
@@ -143,10 +140,13 @@ export function AppShell() {
 
   return (
     <div className="gr-app-shell" data-view={activeView}>
-      <Sidebar active={activeView} onNavigate={setActiveView} demoActive={Boolean(demoActive)} />
+      <Sidebar active={activeView} onNavigate={navigate} />
       <main className="gr-main-area">
         <header className="gr-topbar">
-          <div className="gr-topbar-left"><div className="gr-breadcrumb">{pageTitles[activeView]}</div><span className="gr-topbar-divider" /><div className="gr-topbar-status" role="status"><CloudCheck size={14} aria-hidden="true" /><span>{saving ? "Saving…" : demoActive ? "Synced" : "Preview mode"}</span></div></div>
+          <div className="gr-topbar-left">
+            <span className="gr-security-badge"><ShieldCheck size={15} aria-hidden="true" /> {demoActive ? "Private workspace" : "Read-only preview"}</span>
+            {saving && <span className="gr-topbar-status" role="status">Saving…</span>}
+          </div>
           <div className="gr-topbar-right">
             <form className="gr-date-filter" onSubmit={(event) => {
               event.preventDefault()
@@ -157,8 +157,7 @@ export function AppShell() {
               <Button type="submit" size="sm" variant="outline" disabled={!history} aria-label="Apply snapshot date">Apply</Button>
             </form>
             <label className="gr-top-control gr-campaign-control"><Search size={14} aria-hidden="true" /><span className="gr-sr-only">Campaign filter</span><select value={campaignFilter} onChange={(event) => setCampaignFilter(event.target.value)} disabled={!history} aria-label="Filter analytics by campaign"><option value="">All campaigns</option>{availableCampaigns.map((campaign) => <option key={campaign.campaignId} value={campaign.campaignId}>{campaign.name}</option>)}<option value="unattributed">Unattributed visits</option></select></label>
-            <span className="gr-security-badge"><ShieldCheck size={15} aria-hidden="true" /> {demoActive ? "Private workspace" : "Read only"}</span>
-            {!demoActive && <Button size="sm" onClick={() => void startDemo()} disabled={startingDemo}>{startingDemo ? "Opening…" : "Retry private mode"}</Button>}
+            {!demoActive && <Button size="sm" onClick={() => void startDemo()} disabled={startingDemo}>{startingDemo ? "Opening…" : "Open private workspace"}</Button>}
           </div>
         </header>
 
@@ -168,9 +167,9 @@ export function AppShell() {
             {historyError && <div className="gr-toast gr-toast-error" role="alert">{historyError.message}<button type="button" onClick={() => void retryHistory()}>Retry snapshot</button></div>}
             {!demoActive && workspace.openingError && !saveError && <div className="gr-toast gr-toast-error" role="status">{workspace.openingError} You can browse in read-only mode.</div>}
             {saveNotice && <div className="gr-toast gr-toast-success" role="status"><CloudCheck size={15} aria-hidden="true" />{saveNotice}</div>}
-            {historyLoading && !displayedHistory ? <div className="gr-data-loading"><LoaderCircle size={18} className="gr-spin" aria-hidden="true" /> Loading the selected snapshot…</div> : null}
+            {historyLoading && !displayedHistory ? <div className="gr-data-loading"><LoaderCircle size={18} className="gr-spin" aria-hidden="true" /> Loading snapshot…</div> : null}
             {displayedHistory && <>
-              {activeView === "overview" && <OverviewPanel history={displayedHistory} campaignFilter={campaignFilter} state={state} onNavigate={setActiveView} onAskAnalyst={() => setAnalystOpen(true)} />}
+              {activeView === "overview" && <OverviewPanel history={displayedHistory} campaignFilter={campaignFilter} state={state} onNavigate={navigate} onAskAnalyst={() => setAnalystOpen(true)} />}
               {activeView === "campaigns" && <CampaignsPanel history={displayedHistory} state={state} filter={campaignFilter} demoActive={Boolean(demoActive)} onSave={saveState} onStartDemo={() => void startDemo()} />}
               {activeView === "bets" && <BetsPanel history={displayedHistory} state={state} demoActive={Boolean(demoActive)} onSave={saveState} onStartDemo={() => void startDemo()} />}
               {activeView === "tasks" && <TasksPanel state={state} demoActive={Boolean(demoActive)} onSave={saveState} onStartDemo={() => void startDemo()} />}
@@ -178,11 +177,10 @@ export function AppShell() {
               {activeView === "data" && <DataPanel history={displayedHistory} state={state} demoActive={Boolean(demoActive)} hasSourceOverride={Boolean(workspace.hasSourceOverride)} onSave={saveState} onStartDemo={() => void startDemo()} onDateImported={afterImport} />}
             </>}
           </div>
-          <footer className="gr-footer"><span>GateReady <i>·</i> Attendee growth workspace</span><span>Source-led · human-reviewed · capacity-aware</span></footer>
         </div>
       </main>
       <AnalystLauncher open={analystOpen} onOpenChange={setAnalystOpen}>
-        {displayedHistory ? <AnalystPanel history={displayedHistory} state={state} date={displayedHistory.snapshotDate} campaignId={campaignFilter} demoActive={Boolean(demoActive)} aiConfigured={workspace.aiConfigured} aiModel={workspace.aiModel} onWorkspaceUpdate={receiveWorkspace} onSave={saveState} onStartDemo={() => void startDemo()} /> : <div className="gr-data-loading" role="status">{historyError ? "Snapshot data is unavailable." : "Loading your snapshot…"}</div>}
+        {displayedHistory ? <AnalystPanel history={displayedHistory} state={state} date={displayedHistory.snapshotDate} campaignId={campaignFilter} demoActive={Boolean(demoActive)} aiConfigured={workspace.aiConfigured} aiModel={workspace.aiModel} onWorkspaceUpdate={receiveWorkspace} onSave={saveState} onStartDemo={() => void startDemo()} startingDemo={startingDemo} demoError={saveError} /> : <div className="gr-data-loading" role="status">{historyError ? "Snapshot data is unavailable." : "Loading your snapshot…"}</div>}
       </AnalystLauncher>
     </div>
   )

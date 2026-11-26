@@ -1,7 +1,6 @@
 "use client"
 
 import { useState } from "react"
-import { ChartNoAxesCombined } from "lucide-react"
 import type { HistoricalAnalytics } from "@/lib/analytics"
 import { formatNumber } from "@/components/gateready/format"
 
@@ -25,8 +24,7 @@ export function AcquisitionChart({ trend }: { trend: HistoricalAnalytics["trend"
   return (
     <article className="gr-card gr-panel gr-trend-panel">
       <div className="gr-panel-heading">
-        <div><div className="gr-section-kicker">MOMENTUM</div><h2>Monthly acquisition signals</h2></div>
-        <span className="gr-panel-symbol"><ChartNoAxesCombined size={17} aria-hidden="true" /></span>
+        <h2>Monthly trends</h2>
       </div>
       {hasActivity ? <>
         <div className="gr-trend-series" role="group" aria-label="Acquisition chart metric">
@@ -44,7 +42,7 @@ export function AcquisitionChart({ trend }: { trend: HistoricalAnalytics["trend"
           ))}
         </div>
       </> : <p className="gr-page-intro">No acquisition activity for this selection.</p>}
-      <div className="gr-chart-note"><span>Daily reported reach can overlap</span><span>Bars scaled to each metric</span></div>
+      <p className="gr-chart-note">Bars are scaled to the selected metric. Daily reach can count the same person more than once.</p>
     </article>
   )
 }

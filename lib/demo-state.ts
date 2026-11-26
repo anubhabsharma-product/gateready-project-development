@@ -9,7 +9,7 @@ export function createDefaultWorkspace(): WorkspaceState {
     {
       id: "seed-confirmation-flow",
       title: "Audit confirmation and arrival information",
-      description: "Map the registration-to-arrival drop-off, then draft a confirmation and travel-information test. This is a planning task, not a source-record task.",
+      description: "Find where registrants drop out before arrival. Draft a test for confirmation and travel information.",
       owner: owners[0] ?? "Growth team",
       dueDate: "2026-12-03",
       priority: "High",
@@ -19,8 +19,8 @@ export function createDefaultWorkspace(): WorkspaceState {
     },
     {
       id: "seed-club-pilot",
-      title: "Recruit a college-club pilot cohort",
-      description: "Select 10 student clubs, agree an eligible group-registration process, and measure confirmed-to-verified arrival by cohort.",
+      title: "Recruit 10 student clubs for the pilot",
+      description: "Agree on how eligible groups will register. Measure verified arrivals among confirmed registrants for each club.",
       owner: owners[1] ?? owners[0] ?? "Growth team",
       dueDate: "2026-12-08",
       priority: "High",
@@ -30,8 +30,8 @@ export function createDefaultWorkspace(): WorkspaceState {
     },
     {
       id: "seed-referral-test",
-      title: "Design a buddy-referral holdout",
-      description: "Randomize eligible invitees to a referral prompt or holdout. Deduplicate by person ID and compare verified arrival, not link clicks alone.",
+      title: "Plan a referral test with a control group",
+      description: "Randomly assign eligible invitees to receive a referral prompt or join the control group. Count each person once and compare verified arrivals.",
       owner: owners[2] ?? owners[0] ?? "Growth team",
       dueDate: "2026-12-12",
       priority: "Medium",

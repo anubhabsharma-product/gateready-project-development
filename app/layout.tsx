@@ -4,8 +4,8 @@ import 'katex/dist/katex.min.css'
 import './globals.css'
 
 export const metadata: Metadata = {
-  title: 'GateReady | Attendee Growth Center',
-  description: 'A data-grounded command center for attendee growth, campaign experiments, arrival planning, and AI-assisted decisions.',
+  title: 'GateReady | Attendee Planning',
+  description: 'Track event registrations, verified arrivals, and campaign spending. Plan attendance and manage experiments.',
   applicationName: 'GateReady',
   generator: 'Next.js',
   icons: { icon: '/gateready-mark.png' },

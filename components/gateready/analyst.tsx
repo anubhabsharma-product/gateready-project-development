@@ -1,19 +1,19 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import ReactMarkdown from "react-markdown"
 import rehypeKatex from "rehype-katex"
 import remarkMath from "remark-math"
-import { Bot, Check, CircleHelp, CornerDownLeft, FileText, LoaderCircle, Plus, RotateCcw, Send, Sparkles, UserRound } from "lucide-react"
+import { Bot, Check, FileText, LoaderCircle, RotateCcw, Send, UserRound } from "lucide-react"
 import type { HistoricalAnalytics } from "@/lib/analytics"
 import type { ChatEntry, GrowthTask, WorkspaceResponse, WorkspaceState } from "@/lib/types"
 import { formatDate } from "@/components/gateready/format"
 
 const starters = [
-  "Which channel has the strongest verified arrival rate—and what is the sample size?",
-  "Compare the lowest-cost and highest-cost sources without claiming causal lift.",
-  "Model 3,100 confirmed registrations at the historical arrival rate. What changes in the base case?",
-  "Draft an owner-assigned test to reduce the confirmed-to-arrival gap.",
+  "Which channel had the highest verified arrival rate? How many people were included?",
+  "Which channels had the lowest and highest cost per verified visitor?",
+  "How would 3,100 confirmations change the base forecast?",
+  "Draft a test to get more confirmed registrants to attend.",
 ]
 
 function timeLabel(value: string) {
@@ -21,7 +21,7 @@ function timeLabel(value: string) {
   return Number.isNaN(date.getTime()) ? "" : date.toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" })
 }
 
-export function AnalystPanel({ history, state, date, campaignId, demoActive, aiConfigured, aiModel, onWorkspaceUpdate, onSave, onStartDemo }: {
+export function AnalystPanel({ history, state, date, campaignId, demoActive, aiConfigured, aiModel, onWorkspaceUpdate, onSave, onStartDemo, startingDemo, demoError }: {
   history: HistoricalAnalytics
   state: WorkspaceState
   date: string
@@ -32,17 +32,25 @@ export function AnalystPanel({ history, state, date, campaignId, demoActive, aiC
   onWorkspaceUpdate: (workspace: WorkspaceResponse) => void
   onSave: (next: WorkspaceState, action: string) => Promise<void>
   onStartDemo: () => void
+  startingDemo: boolean
+  demoError: string
 }) {
   const [question, setQuestion] = useState("")
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState("")
   const [notice, setNotice] = useState("")
+  const messagesRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    const messages = messagesRef.current
+    if (messages) messages.scrollTop = messages.scrollHeight
+  }, [state.conversation, busy, notice])
 
   async function ask(value = question) {
     const prompt = value.trim()
     if (!prompt || busy) return
     if (!demoActive) {
-      setError("Start a private demo before asking the analyst. The conversation is saved only to that workspace.")
+      setError("Open a private workspace to ask the analyst.")
       return
     }
     if (!aiConfigured) {
@@ -89,7 +97,6 @@ export function AnalystPanel({ history, state, date, campaignId, demoActive, aiC
     const conversation = state.conversation.map((entry) => entry.id === message.id ? { ...entry, taskProposal: { ...proposal, confirmed: true } } : entry)
     try {
       await onSave({ ...state, tasks: [...state.tasks, task], conversation }, "assistant_task")
-      setNotice("Task confirmed and saved to the action board.")
     } catch (saveError) {
       setError(saveError instanceof Error ? saveError.message : "The proposed task could not be saved.")
     }
@@ -99,7 +106,7 @@ export function AnalystPanel({ history, state, date, campaignId, demoActive, aiC
     if (!state.conversation.length) return
     try {
       await onSave({ ...state, conversation: [] }, "ai_chat")
-      setNotice("Saved analyst conversation cleared from this demo workspace.")
+      setNotice("Conversation cleared.")
     } catch (saveError) {
       setError(saveError instanceof Error ? saveError.message : "Unable to clear this conversation.")
     }
@@ -113,35 +120,64 @@ export function AnalystPanel({ history, state, date, campaignId, demoActive, aiC
     }
   }
 
+  const campaignName = history.allCampaigns.find((campaign) => campaign.campaignId === campaignId)?.name
+  const campaignLabel = campaignId === "unattributed" ? "Unattributed visits" : campaignName ?? "All campaigns"
+  const canChat = demoActive && aiConfigured
+
   return (
-    <div className="gr-page-stack gr-analyst-page">
-      <section className="gr-welcome-row"><div><div className="gr-eyebrow">GEMINI · FUNCTION-TOOL ANALYSIS · SNAPSHOT {history.snapshotDate}</div><p className="gr-page-intro">Compare campaign results, model scenarios, or draft an action for review.</p></div><span className={`gr-ai-status-pill ${aiConfigured ? "is-ready" : "is-missing"}`}><span /> {!demoActive ? "Private demo required" : aiConfigured ? `${aiModel} ready` : "Gemini key needed"}</span></section>
-
-      <section className="gr-analyst-layout">
-        <div className="gr-card gr-chat-panel">
-          <div className="gr-chat-heading"><span className="gr-chat-avatar"><Bot size={19} aria-hidden="true" /></span><div><strong>GateReady analyst</strong><span>Source-aware · private thread · saved to this workspace</span></div><button type="button" className="gr-icon-button gr-clear-chat" onClick={() => void clearConversation()} disabled={!demoActive || busy || !state.conversation.length} aria-label="Clear saved analyst conversation" title="Clear saved conversation"><RotateCcw size={15} aria-hidden="true" /></button></div>
-          <div className="gr-chat-context"><span className="gr-context-dot" /> Context: {history.eventName} · {history.snapshotDate}{campaignId ? ` · ${history.campaigns[0]?.name ?? "Selected campaign"}` : " · all campaigns"}<span className="gr-context-lock"><CircleHelp size={13} aria-hidden="true" /> Synthetic source · no causal claim</span></div>
-          <div className="gr-chat-messages" aria-live="polite" aria-relevant="additions text">
-            {!state.conversation.length && <div className="gr-chat-welcome"><span className="gr-chat-welcome-mark"><Sparkles size={19} aria-hidden="true" /></span><h2>Start with a decision.</h2><p>I can compare observed campaign results, calculate a transparent arrival scenario, or draft a task. I cannot infer weather, venue capacity, or causal lift from this workbook.</p><div className="gr-starter-list">{starters.map((starter) => <button key={starter} type="button" className="gr-starter-chip" onClick={() => void ask(starter)} disabled={busy || !demoActive || !aiConfigured}>{starter}<CornerDownLeft size={13} aria-hidden="true" /></button>)}</div></div>}
-            {state.conversation.map((message) => <div className={`gr-chat-message ${message.role === "assistant" ? "assistant" : "user"}`} key={message.id}><span className={`gr-message-avatar ${message.role}`} aria-hidden="true">{message.role === "assistant" ? <Bot size={15} /> : <UserRound size={15} />}</span><div className="gr-message-bubble"><div className="gr-message-meta"><strong>{message.role === "assistant" ? "GateReady analyst" : "You"}</strong><span>{timeLabel(message.createdAt)}</span></div><ReactMarkdown remarkPlugins={[remarkMath]} rehypePlugins={[rehypeKatex]}>{message.text}</ReactMarkdown>{message.taskProposal && <div className="gr-task-proposal"><div className="gr-task-proposal-title"><FileText size={15} aria-hidden="true" /><strong>Draft action · {String(message.taskProposal.priority ?? "Medium")}</strong></div><div className="gr-proposal-details"><strong>{String(message.taskProposal.title ?? "")}</strong><span>{String(message.taskProposal.owner ?? "Growth team")} · due {formatDate(String(message.taskProposal.dueDate ?? date))}</span><p>{String(message.taskProposal.description ?? "")}</p></div>{message.taskProposal.confirmed === true || state.tasks.some((task) => task.id === `ai-task-${message.id}`) ? <span className="gr-proposal-confirmed"><Check size={14} aria-hidden="true" /> Confirmed · saved to Action board</span> : <button type="button" className="gr-button gr-button-primary gr-confirm-task" onClick={() => void confirmTask(message)} disabled={!demoActive}><Check size={14} aria-hidden="true" /> Confirm and add to action board</button>}</div>}</div></div>)}
-            {busy && <div className="gr-chat-typing"><span><LoaderCircle size={15} className="gr-spin" aria-hidden="true" /></span> Reading the selected snapshot and checking the numbers…</div>}
+    <section className="gr-chat-panel" aria-label="Analyst conversation">
+      <div className="gr-chat-context">
+        <p>{history.eventName}, {formatDate(history.snapshotDate)} ({campaignLabel})</p>
+        <button type="button" className="gr-icon-button gr-clear-chat" onClick={() => void clearConversation()} disabled={!demoActive || busy || !state.conversation.length} aria-label="Clear saved analyst conversation" title="Clear saved conversation"><RotateCcw size={18} aria-hidden="true" /></button>
+      </div>
+      <div className="gr-chat-messages" ref={messagesRef} role="log" aria-label="Messages" aria-relevant="additions text" tabIndex={0}>
+        {!state.conversation.length && (
+          <div className="gr-chat-welcome">
+            <h3>{canChat ? "Suggested questions" : "No messages yet"}</h3>
+            {canChat && <div className="gr-starter-list">{starters.map((starter) => <button key={starter} type="button" className="gr-starter-chip" onClick={() => void ask(starter)} disabled={busy}>{starter}</button>)}</div>}
           </div>
-          {error && <div className="gr-chat-error" role="alert">{error}</div>}{notice && <div className="gr-chat-notice" role="status">{notice}</div>}
-          <form className="gr-chat-composer" onSubmit={(event) => { event.preventDefault(); void ask() }}>
-            <label className="gr-sr-only" htmlFor="gr-analyst-question">Ask the GateReady analyst</label><textarea id="gr-analyst-question" value={question} onChange={(event) => setQuestion(event.target.value)} onKeyDown={handleKeyDown} placeholder={!demoActive ? "Draft a question, then open a private demo to send it…" : aiConfigured ? "Ask about verified arrivals, channel efficiency, or a scenario…" : "Gemini is not configured for this deployment…"} maxLength={2500} rows={2} disabled={busy} />
-            <div className="gr-composer-footer"><span><CircleHelp size={13} aria-hidden="true" /> Private saved thread · avoid entering sensitive personal data</span><button type="submit" className="gr-send-button" disabled={!demoActive || !aiConfigured || busy || !question.trim()} aria-label="Send question">{busy ? <LoaderCircle size={17} className="gr-spin" aria-hidden="true" /> : <Send size={17} aria-hidden="true" />}</button></div>
-          </form>
+        )}
+        {state.conversation.map((message) => (
+          <div className={`gr-chat-message ${message.role}`} key={message.id}>
+            <span className={`gr-message-avatar ${message.role}`} aria-hidden="true">{message.role === "assistant" ? <Bot size={17} /> : <UserRound size={17} />}</span>
+            <div className="gr-message-bubble">
+              <div className="gr-message-meta"><strong>{message.role === "assistant" ? "GateReady analyst" : "You"}</strong><span>{timeLabel(message.createdAt)}</span></div>
+              <div className="gr-message-content"><ReactMarkdown remarkPlugins={[remarkMath]} rehypePlugins={[rehypeKatex]}>{message.text}</ReactMarkdown></div>
+              {message.taskProposal && (
+                <div className="gr-task-proposal">
+                  <div className="gr-task-proposal-title"><FileText size={16} aria-hidden="true" /><strong>Draft action ({String(message.taskProposal.priority ?? "Medium")} priority)</strong></div>
+                  <div className="gr-proposal-details">
+                    <strong>{String(message.taskProposal.title ?? "")}</strong>
+                    <span>{String(message.taskProposal.owner ?? "Growth team")}, due {formatDate(String(message.taskProposal.dueDate ?? date))}</span>
+                    <p>{String(message.taskProposal.description ?? "")}</p>
+                  </div>
+                  {message.taskProposal.confirmed === true || state.tasks.some((task) => task.id === `ai-task-${message.id}`)
+                    ? <span className="gr-proposal-confirmed"><Check size={16} aria-hidden="true" /> Saved to the action board</span>
+                    : <button type="button" className="gr-button gr-button-primary" onClick={() => void confirmTask(message)} disabled={!demoActive}><Check size={16} aria-hidden="true" /> Confirm and add to action board</button>}
+                </div>
+              )}
+            </div>
+          </div>
+        ))}
+        {busy && <div className="gr-chat-typing"><LoaderCircle size={16} className="gr-spin" aria-hidden="true" /> Checking the snapshot…</div>}
+      </div>
+      {!demoActive && (
+        <div className="gr-chat-availability">
+          <span>Open a private workspace to send messages.</span>
+          <button type="button" className="gr-button gr-button-primary" onClick={onStartDemo} disabled={startingDemo}>{startingDemo ? "Opening…" : "Open private workspace"}</button>
         </div>
-
-        <aside className="gr-card gr-analyst-rail">
-          <div className="gr-rail-heading"><div className="gr-ai-rail-icon"><Sparkles size={17} aria-hidden="true" /></div><div><span className="gr-section-kicker">WHAT IT CAN DO</span><h2>Calculate, don&apos;t guess.</h2></div></div>
-          <div className="gr-capability-list"><div><strong>Read source history</strong><p>Uses stable IDs, date cutoffs, verified external check-ins, and explicit campaign attribution.</p></div><div><strong>Compare real channels</strong><p>Calls typed functions for campaign metrics and separates descriptive rates from causal lift.</p></div><div><strong>Model arrival scenarios</strong><p>Recomputes an attendance case and applies the current working-capacity assumption.</p></div><div><strong>Draft tracked actions</strong><p>Offers an owner and due date, but waits for you to confirm before saving.</p></div></div>
-          <div className="gr-rail-separator" />
-          <div className="gr-guardrail"><span><CircleHelp size={14} aria-hidden="true" /> Analyst guardrails</span><ul><li>No invented weather or travel explanation</li><li>No backfilled check-in attribution</li><li>No claim of randomized lift</li><li>No silent task creation</li></ul></div>
-          {!demoActive && <button type="button" className="gr-button gr-button-primary gr-full-button" onClick={onStartDemo}>Open private demo</button>}
-          {demoActive && !aiConfigured && <div className="gr-ai-key-hint"><span>Setup required</span><p>Add the server-only <code>GEMINI_API_KEY</code> project environment variable. The browser never receives the key.</p></div>}
-        </aside>
-      </section>
-    </div>
+      )}
+      {demoActive && !aiConfigured && <p className="gr-chat-availability">The analyst is unavailable until Gemini is configured.</p>}
+      {(error || (!demoActive && demoError)) && <div className="gr-chat-error" role="alert">{error || demoError}</div>}
+      {notice && <div className="gr-chat-notice" role="status">{notice}</div>}
+      <form className="gr-chat-composer" onSubmit={(event) => { event.preventDefault(); void ask() }}>
+        <label className="gr-sr-only" htmlFor="gr-analyst-question">Ask the GateReady analyst</label>
+        <textarea id="gr-analyst-question" value={question} onChange={(event) => setQuestion(event.target.value)} onKeyDown={handleKeyDown} placeholder="Type a question" maxLength={2500} rows={2} disabled={busy} />
+        <div className="gr-composer-footer">
+          <span>Messages are saved in this workspace. Avoid sharing sensitive personal data.</span>
+          <button type="submit" className="gr-send-button" disabled={!canChat || busy || !question.trim()} aria-label="Send question">{busy ? <LoaderCircle size={19} className="gr-spin" aria-hidden="true" /> : <Send size={19} aria-hidden="true" />}</button>
+        </div>
+      </form>
+    </section>
   )
 }
